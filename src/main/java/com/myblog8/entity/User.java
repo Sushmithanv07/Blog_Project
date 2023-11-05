@@ -35,7 +35,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"), // parent table (User)  column user_id is joined with child table column (Role) column role_id
             inverseJoinColumns = @JoinColumn(name = "role_id") //  child table
     )
-    private Set<Role> roles = new HashSet<>();
+    private Set<com.myblog8.entity.Role> roles = new HashSet<>();
 
     // Constructors, getters, and setters
 }

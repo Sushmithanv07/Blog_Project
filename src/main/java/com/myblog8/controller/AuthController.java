@@ -3,10 +3,12 @@ package com.myblog8.controller;
 
 import com.myblog8.entity.Role;
 import com.myblog8.entity.User;
+import com.myblog8.payloadDTO.JWTAuthResponse;
 import com.myblog8.payloadDTO.LoginDto;
 import com.myblog8.repository.RoleRepository;
 import com.myblog8.payloadDTO.SignUpDto;
 import com.myblog8.repository.UserRepository;
+import com.myblog8.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,9 @@ import java.util.Set;
 public class AuthController {
     @Autowired
     private UserRepository userRepo;
+
+    @Autowired
+    private JwtTokenProvider tokenProvider;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -71,12 +76,14 @@ public class AuthController {
     }
 
     @PostMapping("/signin")  // login
-    public ResponseEntity<String> authenticateUser(@RequestBody LoginDto loginDto){
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDto.getUsernameOrEmail(), loginDto.getPassword())
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authentication); // token generated is kept in SecurityContextHolder
-        return new ResponseEntity<>("User signed in successfully!.", HttpStatus.OK);
+    public ResponseEntity<JWTAuthResponse> authenticateUser(@RequestBody LoginDto
+                                                                    loginDto){
+        Authentication authentication = authenticationManager.authenticate(new
+                UsernamePasswordAuthenticationToken(
+                loginDto.getUsernameOrEmail(), loginDto.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // get token form tokenProvider
+        String token = tokenProvider.generateToken(authentication);
+        return ResponseEntity.ok(new JWTAuthResponse(token));
     }
 }
